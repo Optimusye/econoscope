@@ -1,0 +1,6 @@
+{
+  "name": "EconoScope",
+  "description": "AI-powered macro-economic early warning and 3D global risk intelligence terminal tracking inflation, food shortages, and supply-chain disruptions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

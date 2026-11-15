@@ -1,0 +1,443 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>EconoScope</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<style>
+:root{--bg:#06090F;--panel:#0D131F;--line:#1E293B;--cy:#06B6D4;--em:#10B981;--am:#F59E0B;--cr:#EF4444;--tx:#E2E8F0;--mut:#94A3B8;--dim:#64748B;--vi:#A78BFA;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:13px/1.5 Inter,system-ui,sans-serif}
+body{min-height:100vh;background:radial-gradient(1200px 500px at 70% -10%,rgba(6,182,212,.07),transparent),var(--bg)}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0;text-align:left}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px;border-radius:4px}
+.ic{width:15px;height:15px;stroke-width:2;flex:none;vertical-align:-3px}
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);grid-template-areas:"cmd cmd" "tick tick" "side main";min-height:100vh}
+.cmd{grid-area:cmd;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:10px 18px;border-bottom:1px solid var(--line);background:rgba(6,9,15,.92);position:sticky;top:0;z-index:30;backdrop-filter:blur(10px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.06em}
+.brand .lg{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(135deg,var(--cy),#0e7490);color:#001018}
+.brand small{display:block;font-size:10px;font-weight:500;color:var(--mut);letter-spacing:.14em}
+.live{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:99px;padding:5px 12px;background:var(--panel)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--em);box-shadow:0 0 0 0 rgba(16,185,129,.6);animation:pu 1.8s infinite;flex:none}
+.dot.am{background:var(--am);animation-name:pua}.dot.cr{background:var(--cr);animation-name:pur}
+@keyframes pu{70%{box-shadow:0 0 0 7px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+@keyframes pua{0%{box-shadow:0 0 0 0 rgba(245,158,11,.6)}70%{box-shadow:0 0 0 7px rgba(245,158,11,0)}100%{box-shadow:0 0 0 0 rgba(245,158,11,0)}}
+@keyframes pur{0%{box-shadow:0 0 0 0 rgba(239,68,68,.7)}70%{box-shadow:0 0 0 8px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.08em;border-radius:5px;padding:2px 8px;border:1px solid}
+.badge.cr{color:#fca5a5;background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.4)}.badge.am{color:#fcd34d;background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.4)}.badge.cy{color:#67e8f9;background:rgba(6,182,212,.12);border-color:rgba(6,182,212,.4)}.badge.em{color:#6ee7b7;background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.4)}
+.grow{flex:1}
+.tfs{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.tfs button{padding:6px 11px;font:600 11px 'JetBrains Mono',monospace;color:var(--mut)}
+.tfs button[aria-pressed=true]{background:var(--cy);color:#00131a}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 12px;font-weight:600;font-size:12px;transition:.15s}
+.btn:hover{border-color:var(--cy);color:#fff}
+.shock{border-color:rgba(239,68,68,.55);color:#fecaca;background:rgba(239,68,68,.1)}.shock:hover{background:rgba(239,68,68,.2);border-color:var(--cr)}
+.shock.on{background:var(--cr);color:#fff}
+.tick{grid-area:tick;border-bottom:1px solid var(--line);overflow:hidden;background:#080c14;white-space:nowrap}
+.tick .trk{display:inline-flex;animation:mq 70s linear infinite}
+.tick:hover .trk{animation-play-state:paused}
+@keyframes mq{to{transform:translateX(-50%)}}
+.ti{display:inline-flex;gap:8px;align-items:center;padding:6px 18px;border-right:1px solid var(--line);font-size:11px}
+.ti b{color:var(--mut);font-weight:600;letter-spacing:.06em}
+.up{color:var(--em)}.dn{color:var(--cr)}
+.side{grid-area:side;padding:16px 12px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;position:sticky;top:96px;align-self:start;height:calc(100vh - 96px);overflow:auto}
+.nav{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:9px;border:1px solid transparent;color:var(--mut);width:100%}
+.nav:hover{background:var(--panel);color:var(--tx)}
+.nav[aria-current=page]{background:linear-gradient(90deg,rgba(6,182,212,.14),rgba(6,182,212,.02));border-color:rgba(6,182,212,.35);color:#fff}
+.nav b{display:block;font-weight:600;font-size:12.5px;line-height:1.25}.nav span{font-size:10.5px;color:var(--dim)}
+.side h5{margin:14px 12px 4px;font-size:10px;letter-spacing:.14em;color:var(--dim);font-weight:600}
+.srcs{margin:0 4px;display:grid;gap:7px;font-size:11px;color:var(--mut)}.srcs div{display:flex;gap:8px;align-items:center}
+.sim{margin:auto 4px 0;font-size:10.5px;color:#fcd34d;border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.07);border-radius:8px;padding:9px 10px}
+.main{grid-area:main;min-width:0;padding:16px 18px 40px;display:grid;gap:14px;align-content:start}
+.mtabs{display:none}
+.regbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.regbar>span{font-size:10px;letter-spacing:.14em;color:var(--dim);margin-right:4px}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:5px 12px;font-size:12px;color:var(--mut);transition:.15s}
+.chip:hover{color:#fff;border-color:#334155}.chip[aria-pressed=true]{color:#00131a;background:var(--cy);border-color:var(--cy);font-weight:600}
+.chip i{font-style:normal;font:700 10px 'JetBrains Mono',monospace;background:rgba(148,163,184,.18);border-radius:99px;padding:0 6px}
+.chip[aria-pressed=true] i{background:rgba(0,19,26,.2)}
+.panel{background:rgba(13,19,31,.82);border:1px solid var(--line);border-radius:12px;backdrop-filter:blur(6px);min-width:0}
+.ph{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.ph h3{margin:0;font-size:12.5px;font-weight:600;letter-spacing:.02em;display:flex;gap:8px;align-items:center}
+.ph h3 .ic{color:var(--cy)}
+.pb{padding:14px}
+.mut{color:var(--mut)}.dim{color:var(--dim)}.p12{padding:12px}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.kpi{padding:14px;position:relative;overflow:hidden}
+.kpi .l{font-size:10.5px;letter-spacing:.08em;color:var(--mut);display:flex;gap:6px;align-items:center;font-weight:600}
+.kpi .v{font:700 30px/1.15 'JetBrains Mono',monospace;margin:6px 0 2px;letter-spacing:-.02em}
+.kpi .s{font-size:11.5px;color:var(--mut)}
+.kpi::after{content:"";position:absolute;inset:auto 0 0 0;height:2px;background:var(--k,var(--cy));opacity:.7}
+.g2{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:14px;align-items:start}
+.g2b{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+.mapw{position:relative;aspect-ratio:1000/470;background:radial-gradient(circle at 50% 40%,#0b1220,#070b13);border-radius:0 0 12px 12px;overflow:hidden}
+.mapw svg{position:absolute;inset:0;width:100%;height:100%}
+.land{stroke:#3a557f;stroke-linecap:round;fill:none}
+.hot{cursor:pointer}.hot:hover circle.c{stroke:#fff}
+.ring{transform-box:fill-box;transform-origin:center;animation:rg 2.4s ease-out infinite}
+@keyframes rg{from{transform:scale(.6);opacity:.7}to{transform:scale(2.6);opacity:0}}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--mut)}.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.feed{display:grid;gap:10px;padding:12px;max-height:560px;overflow:auto}
+.al{display:grid;gap:7px;width:100%;padding:12px;border:1px solid var(--line);border-left:3px solid var(--sc);border-radius:10px;background:rgba(6,9,15,.6);transition:.15s;--sc:var(--cy)}
+.al:hover{background:rgba(13,19,31,1);border-color:#334155;border-left-color:var(--sc);transform:translateX(2px)}
+.al.cr{--sc:var(--cr)}.al.am{--sc:var(--am)}
+.al .r1{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px}
+.al h4{margin:0;font-size:13px;font-weight:600;line-height:1.35}
+.al .ld{font-size:11.5px;color:#7dd3fc}.al .ld b{color:#fff}
+.al .tt{font-size:10.5px;color:var(--dim)}
+.al .why{font-size:11px;color:var(--cy);display:flex;gap:6px;align-items:center}
+.new{font:700 9px 'JetBrains Mono',monospace;background:var(--cr);color:#fff;border-radius:4px;padding:1px 6px;animation:fl 1s 4}
+@keyframes fl{50%{opacity:.35}}
+.tri{display:flex;height:6px;border-radius:9px;overflow:hidden;background:#111a2b;gap:2px}
+.tri i{display:block;height:100%}
+.cfr{display:flex;align-items:center;gap:10px;font-size:11.5px}
+.cfr .tri{flex:1}
+.chart{position:relative;height:300px;padding:12px}
+.impg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.imc{border:1px solid var(--line);border-radius:10px;padding:10px;background:rgba(6,9,15,.55);position:relative}
+.imc h6{margin:0 0 8px;font-size:10px;letter-spacing:.1em;color:var(--mut);display:flex;justify-content:space-between}
+.imn{padding:8px;border-radius:8px;background:rgba(30,41,59,.45);margin-bottom:7px;font-size:11.5px;line-height:1.35}
+.imn .pb2{height:4px;border-radius:9px;background:#0b1220;margin-top:6px}.imn .pb2 i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--cy),var(--cr))}
+select{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:inherit;max-width:100%}
+.cols3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.bk{padding:14px;border:1px solid var(--line);border-radius:12px;background:rgba(13,19,31,.82);display:grid;gap:8px;width:100%;transition:.15s}
+.bk:hover{border-color:#334155}.bk[aria-pressed=true]{border-color:var(--cy);box-shadow:0 0 0 1px rgba(6,182,212,.35) inset;background:rgba(6,182,212,.06)}
+.bk .t{display:flex;justify-content:space-between;align-items:center;font-weight:600}.bk .t span{display:flex;gap:8px;align-items:center}
+.bk .n{display:flex;gap:14px;align-items:baseline}.bk .n b{font:700 24px 'JetBrains Mono',monospace;color:var(--cy)}.bk .n em{font:500 13px 'JetBrains Mono',monospace;color:var(--em);font-style:normal}
+.hb{height:6px;border-radius:9px;background:#111a2b;overflow:hidden}.hb i{display:block;height:100%;border-radius:9px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-weight:600;font-size:10.5px;letter-spacing:.08em;color:var(--dim);text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}
+td{padding:10px 12px;border-bottom:1px solid rgba(30,41,59,.6)}tr:last-child td{border:0}.r{text-align:right}
+.scr{overflow-x:auto}
+.ck{padding:14px;display:grid;gap:9px}
+.ck .t{display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.ck .m{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ck .m div{background:rgba(30,41,59,.4);border-radius:8px;padding:7px 9px}.ck .m small{display:block;font-size:9.5px;letter-spacing:.08em;color:var(--dim)}.ck .m b{font:600 14px 'JetBrains Mono',monospace}
+.gz{display:flex;align-items:center;gap:10px}
+.gz svg{flex:none}
+.cd{font:600 12px 'JetBrains Mono',monospace;color:#fcd34d}
+.sg{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:start}
+.sgl{max-height:660px;overflow:auto;display:grid}
+.sr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;padding:11px 14px;border-bottom:1px solid rgba(30,41,59,.6);width:100%;transition:.12s;border-left:2px solid transparent}
+.sr:hover{background:rgba(30,41,59,.35)}.sr[aria-pressed=true]{background:rgba(6,182,212,.08);border-left-color:var(--cy)}
+.sr.fresh{animation:fr 1.6s}
+@keyframes fr{from{background:rgba(6,182,212,.3)}}
+.tag{font:600 10px Inter,sans-serif;border-radius:5px;padding:1px 7px;border:1px solid;white-space:nowrap}
+.stg{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;background:rgba(6,9,15,.5)}
+.stg h6{margin:0 0 8px;font-size:10px;letter-spacing:.12em;color:var(--cy);display:flex;gap:7px;align-items:center}
+.ent{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:11px;margin:0 6px 6px 0;background:rgba(30,41,59,.4)}.ent small{color:var(--dim);font:600 9px 'JetBrains Mono',monospace}
+.cz{display:grid;gap:6px}.cz div{display:flex;gap:10px;align-items:flex-start;font-size:12px}.cz span{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font:700 10px 'JetBrains Mono',monospace;background:rgba(6,182,212,.15);color:var(--cy);border:1px solid rgba(6,182,212,.4)}
+#scrim{position:fixed;inset:0;background:rgba(2,4,8,.6);opacity:0;pointer-events:none;transition:.25s;z-index:50;backdrop-filter:blur(2px)}
+#scrim.on{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);background:#09101b;border-left:1px solid var(--line);z-index:60;transform:translateX(102%);transition:transform .3s cubic-bezier(.2,.8,.2,1);overflow:auto;box-shadow:-20px 0 60px rgba(0,0,0,.5)}
+#drawer.on{transform:none}
+#drawer .dh{position:sticky;top:0;background:rgba(9,16,27,.96);backdrop-filter:blur(8px);padding:16px 18px;border-bottom:1px solid var(--line);z-index:2;display:grid;gap:8px}
+#drawer .db{padding:16px 18px 30px;display:grid;gap:16px}
+#drawer h2{margin:0;font-size:17px;line-height:1.3}
+#drawer h5{margin:0 0 8px;font-size:10.5px;letter-spacing:.12em;color:var(--cy);display:flex;gap:7px;align-items:center}
+.cite{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:12px;margin-bottom:7px;background:rgba(13,19,31,.7)}
+.an{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:rgba(13,19,31,.7);font-size:12px}
+.act{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;margin-bottom:7px}
+.act .ic{color:var(--em);margin-top:2px}
+.trib{display:grid;gap:9px;font-size:11.5px}.trib div{display:grid;grid-template-columns:100px 1fr auto;gap:10px;align-items:center}
+#toasts{position:fixed;right:16px;bottom:16px;z-index:80;display:grid;gap:8px;max-width:360px}
+.toast{background:#0d131f;border:1px solid var(--line);border-left:3px solid var(--cy);border-radius:10px;padding:10px 14px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:ti .3s}
+.toast.cr{border-left-color:var(--cr)}.toast.am{border-left-color:var(--am)}
+@keyframes ti{from{transform:translateY(10px);opacity:0}}
+.view{display:grid;gap:14px;animation:vi .3s}
+@keyframes vi{from{opacity:0;transform:translateY(5px)}}
+@media(max-width:1180px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.g2,.g2b,.sg{grid-template-columns:minmax(0,1fr)}.feed{max-height:520px}}
+@media(max-width:980px){.app{grid-template-columns:minmax(0,1fr);grid-template-areas:"cmd" "tick" "main"}.side{display:none}.mtabs{display:flex;gap:6px;overflow-x:auto}.mtabs .chip{white-space:nowrap}.cmd{position:static}.impg{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:620px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi .v{font-size:23px}.main{padding:12px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+
+<div class="app">
+  <header class="cmd">
+    <div class="brand"><div class="lg"><i data-lucide="scan-eye" class="ic" style="width:18px;height:18px"></i></div><div>ECONOSCOPE // MACRO-INTELLIGENCE ENGINE<small>EARLY WARNING TERMINAL</small></div></div>
+    <div class="live"><span class="dot"></span><span id="status" class="mono">AI INGESTION: ACTIVE &bull; 14,280 SIGNALS/MIN</span></div>
+    <span id="threat" class="badge am"></span>
+    <span class="grow"></span>
+    <div class="tfs" id="tfs" role="group" aria-label="Timeframe"></div>
+    <button class="btn shock" id="shockBtn" data-act="shock"><i data-lucide="zap" class="ic"></i><span>Simulate Crisis Shock</span></button>
+    <span class="mono dim" id="clock"></span>
+  </header>
+  <div class="tick" id="tick" aria-label="Simulated market telemetry"></div>
+  <aside class="side" id="side"></aside>
+  <main class="main">
+    <div class="mtabs" id="mtabs"></div>
+    <div class="regbar" id="regbar"></div>
+    <div id="view"></div>
+  </main>
+</div>
+<div id="scrim" data-act="close"></div>
+<aside id="drawer" aria-label="AI explainability drawer" aria-hidden="true"></aside>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), f1=v=>Number(v).toFixed(1);
+const icon=(n,c='')=>`<i data-lucide="${n}" class="ic ${c}"></i>`;
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const SEVC={CRITICAL:'cr',ELEVATED:'am',WATCH:'cy'}, SEVH={CRITICAL:'#EF4444',ELEVATED:'#F59E0B',WATCH:'#06B6D4'}, SEVR={CRITICAL:0,ELEVATED:1,WATCH:2};
+const SRC_C={'Forbes':'#A78BFA','World Bank':'#38BDF8','FAO':'#34D399','X/Social Velocity':'#F472B6','GDELT':'#FBBF24','Spot Markets':'#06B6D4'};
+const hash=s=>[...s].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+function rnd(seed){let s=seed%2147483647;if(s<=0)s+=2147483646;return()=>(s=s*16807%2147483647)/2147483647}
+const srcTag=s=>`<span class="tag" style="color:${SRC_C[s]};border-color:${SRC_C[s]}55;background:${SRC_C[s]}14">${s}</span>`;
+
+/* ---------- reference data (all simulated) ---------- */
+const REG={
+ global:{n:'Global',ic:'globe',rt:6.8,off:4.1,sp:41,sig:14280,thr:'ELEVATED',box:[-180,-58,180,78]},
+ eafrica:{n:'East Africa',ic:'map-pin',rt:27.4,off:13.2,sp:78,sig:2140,thr:'CRITICAL',box:[18,-16,56,26]},
+ mena:{n:'MENA',ic:'map-pin',rt:19.6,off:9.8,sp:66,sig:3010,thr:'ELEVATED',box:[-18,8,68,42]},
+ eurozone:{n:'Eurozone',ic:'map-pin',rt:4.2,off:3.1,sp:24,sig:2650,thr:'WATCH',box:[-14,34,38,62]},
+ seasia:{n:'Southeast Asia',ic:'map-pin',rt:7.9,off:5.2,sp:38,sig:2480,thr:'WATCH',box:[88,-12,142,26]},
+ americas:{n:'Americas',ic:'map-pin',rt:8.7,off:6.0,sp:33,sig:3000,thr:'WATCH',box:[-128,-42,-30,52]}};
+const TF={'24H':{n:24,step:1},'7D':{n:28,step:6},'30D':{n:30,step:24},'90D':{n:45,step:48}};
+const SFX={'World Bank':'dataset series','FAO':'FPMA price bulletin series','GDELT':'event cluster','Forbes':'coverage cluster','X/Social Velocity':'mention-velocity cluster','Spot Markets':'price and term-structure move'};
+const IM=(c,t)=>[[[t[0],c-2],[t[1],c-6]],[[t[2],c-14],[t[3],c-20]],[[t[4],c-30],[t[5],c-38]]].map(o=>o.map(([x,p])=>[x,Math.round(p)]));
+const A=(id,sev,regs,cat,title,lead,conf,src,why,chain,imp,an,topic,cs,act)=>({id,sev,regs,cat,title,lead,conf,src,why,chain,imp:IM(conf,imp),an,cites:cs.map(s=>[s,`${topic}: ${SFX[s]}`]),act});
+const ALERTS=[
+ A('a1','CRITICAL',['global','eafrica'],'Shortage','Fertilizer shortfall threatens East African planting season',21,94.2,[4,12,3400],'Urea and DAP landed prices are up 38% in 8 weeks while port arrivals into Djibouti and Mombasa run 27% below the seasonal norm, just ahead of the long-rains planting window.',['Urea and DAP spot prices +38% (8 weeks)','Port arrivals 27% below seasonal norm','Application rates fall at planting','Maize and teff yield outlook cut 9-14%','Staple prices rise ahead of harvest'],['Fertilizer landed cost +38%','Port arrivals -27%','Planting-season input cuts','Cereal yield -9 to -14%','Regional bread inflation +6 to 9 pts','Social unrest risk rises'],{y:2008,t:'Global food price crisis',r:'Input and staple prices rose sharply within two quarters',s:81},'Fertilizer supply',['World Bank','FAO','GDELT','Forbes'],['Release strategic fertilizer reserves to smallholder cooperatives','Fast-track port clearance for input cargo','Lock forward urea cover for the next two quarters','Raise maize import hedges ahead of the lean season']),
+ A('a2','CRITICAL',['global','eafrica'],'Inflation','Currency slide and staple pass-through accelerating in Ethiopia and Kenya',18,92.6,[3,9,2100],'Parallel-market FX premiums widened 11 points in three weeks while retail maize and teff quotes rose 19% across four markets, well ahead of the monthly CPI basket refresh.',['Parallel FX premium +11 pts (3 weeks)','Importer margin calls lift landed cost','Retail maize and teff +19% in 4 markets','Official food CPI print lags 5-6 weeks'],['FX premium +11 pts','Retail staples +19%','Food CPI +5 to 7 pts','Real wage compression','Central bank tightening','Subsidy bill widens'],{y:2011,t:'East Africa currency and drought stress',r:'Food inflation outran headline CPI for months',s:79},'Retail price and FX',['FAO','World Bank','X/Social Velocity'],['Publish a weekly market price bulletin to anchor expectations','Target support at grain retail chains','Cut unhedged import-currency exposure','Move procurement to local-currency forwards']),
+ A('a3','CRITICAL',['global','mena'],'Inflation','Wheat import bill spike strains bread subsidy in Egypt',16,91.1,[5,14,2800],'Wheat landed cost is up 24% in six weeks as Black Sea transit delays and a weaker pound compound. Subsidized bread costs run an estimated 18% above the budget run-rate.',['Black Sea transit delays +6 days','Wheat landed cost +24% (6 weeks)','Subsidy cost +18% vs budget','Financing gap forces a policy response'],['Wheat landed cost +24%','Transit delay +6 days','Subsidy overrun +18%','FX reserves drawdown','Bread price adjustment risk','Social unrest risk rises'],{y:2008,t:'Global food price crisis',r:'Bread-price protests across several importers',s:74},'Wheat import cost',['World Bank','GDELT','Spot Markets'],['Diversify wheat origins and add forward cover','Pre-fund subsidy through bridge financing','Buy wheat call spreads for the next two tenders','Lock freight with fixed-rate charters']),
+ A('a4','ELEVATED',['global','mena'],'Supply chain','Red Sea rerouting adds freight cost to Yemen-bound food cargoes',12,87.4,[2,11,1700],'Carriers diverting around the Cape add 9-12 days and raise per-tonne freight 31% on Yemen-bound grain and oil cargoes.',['Carrier diversions via the Cape','Transit +9 to 12 days','Freight +31% per tonne','Retail oil and flour prices rise'],['Freight +31%','Transit +9 to 12 days','Retail flour +12%','Port stock cover falls','Food insecurity phase worsens','Aid pipeline delays'],{y:2024,t:'Red Sea diversion episode',r:'Freight and insurance costs repriced for months',s:77},'Red Sea freight',['GDELT','Spot Markets','Forbes'],['Pre-position food stocks at regional hubs','Coordinate convoy and insurance guarantees','Fix freight rates for 90 days','Add alternate-port contracts']),
+ A('a5','ELEVATED',['global','mena'],'Supply chain','Hormuz war-risk premiums surge on tanker routes',9,83.8,[3,8,950],'War-risk premiums on tanker transits have doubled in ten days even as physical flows remain normal, an early marker of fuel price pass-through.',['War-risk premiums x2 in 10 days','Tanker charter rates rise','Diesel import cost up','Transport and food distribution costs rise'],['Premiums x2','Charter rates +17%','Diesel import cost +9%','Transport fares up','Food retail pass-through','Subsidy pressure'],{y:2019,t:'Gulf tanker incidents',r:'Premium spike without sustained flow loss',s:68},'Tanker insurance',['Spot Markets','GDELT'],['Review strategic fuel stock cover','Pre-arrange alternate supply lines','Hedge diesel exposure for two quarters','Extend freight-rate caps']),
+ A('a6','ELEVATED',['global','eurozone','mena'],'Supply chain','Black Sea grain corridor inspection backlog lifts wheat futures',11,89.3,[4,13,2300],'Inspection backlogs have pushed average waiting time to 6.2 days and thinned insurance cover, widening the wheat futures term structure.',['Inspection backlog builds','Waiting time 6.2 days','Insurance cover thins','Wheat futures term structure widens'],['Waiting time 6.2 days','Futures spread widens','Importer tender prices up','Milling margins squeezed','Bread price pressure','Import-dependent budgets strain'],{y:2022,t:'Black Sea export disruption',r:'Wheat price spike followed by gradual normalisation',s:86},'Corridor waiting times',['GDELT','World Bank','FAO','Spot Markets'],['Open diplomatic channel on inspection throughput','Release reserve wheat to cap prices','Roll forward wheat hedges','Source alternative origins']),
+ A('a7','WATCH',['global','eurozone'],'Inflation','Gas storage drawdown running ahead of seasonal norm',7,78.5,[3,6,640],'Storage draw rates are 1.4 standard deviations above the seasonal norm, pointing to energy-led goods inflation in two quarters.',['Storage draw above norm','Spot gas rises','Industrial input costs rise','Goods inflation follows'],['Storage draw +1.4 sd','TTF gas +9%','Input costs +4%','Fertilizer output cut','Goods CPI +0.4 pts','Wage demands rise'],{y:2021,t:'European gas squeeze',r:'Energy prices fed through to goods over two quarters',s:72},'Gas storage',['World Bank','Spot Markets'],['Coordinate storage refill targets','Support energy-intensive producers selectively','Hedge gas for the winter strip','Lock in power purchase agreements']),
+ A('a8','WATCH',['global','eurozone'],'Inflation','Food-processing producer prices accelerating',6,74.9,[2,5,520],'Producer price momentum in food processing has risen for four straight prints, usually a leading indicator for retail food CPI.',['Producer price momentum up','Margins compress','Retail repricing begins','Food CPI follows'],['PPI food +3.1%','Margins -1.2 pts','Retail food +1.8%','Basket shifts to private labels','Consumer sentiment dips','Retail volumes soften'],{y:2022,t:'Producer to consumer pass-through',r:'Retail food prices followed producer prices within a quarter',s:70},'Producer prices',['World Bank','Forbes'],['Monitor retail pass-through weekly','Review competition-policy triggers','Hedge key input contracts','Reprice procurement agreements']),
+ A('a9','ELEVATED',['global','seasia'],'Shortage','Rice export restriction chatter lifts regional quotes',10,86.2,[3,10,3100],'Mention velocity on export curbs is 6x baseline and Thai and Vietnamese 5% broken quotes are up 8% in nine days.',['Export-curb rumours spread','Quotes +8% in 9 days','Importers rush forward buying','Regional stock draws accelerate'],['Quote rise +8%','Mentions 6x baseline','Forward buying surge','Stocks draw down faster','Retail rice +10%','Aid ration costs rise'],{y:2008,t:'Rice export curbs',r:'Prices spiked as exporters restricted shipments',s:75},'Rice export policy',['X/Social Velocity','FAO','Spot Markets'],['Open dialogue with exporters on supply assurances','Release buffer rice stocks','Stagger import contracts','Avoid panic buying through forward cover']),
+ A('a10','WATCH',['global','seasia'],'Supply chain','Palm oil export logistics congestion at Port Klang',5,72.3,[2,4,610],'Vessel waiting time at the port is 40% above its 30-day average, delaying edible-oil shipments.',['Berth congestion','Waiting time +40%','Shipment delays','Edible-oil price premium'],['Waiting +40%','Shipments delayed','Oil premium +3%','Importer stocks fall','Retail oil +5%','Substitution to other oils'],{y:2021,t:'Port congestion wave',r:'Edible-oil premiums persisted for weeks',s:66},'Port congestion',['GDELT','Spot Markets'],['Prioritise food cargo berthing','Add temporary storage capacity','Diversify oil origins','Use flexible delivery windows']),
+ A('a11','ELEVATED',['global','americas'],'Supply chain','Canal draft limits cut grain transit slots',14,88.7,[3,9,880],'Daily transit slots are down 22% under draft limits, deferring grain bookings and lifting Pacific-route freight.',['Draft limits tighten','Daily slots -22%','Grain bookings deferred','Freight and basis widen'],['Slots -22%','Freight +14%','Basis widens','Export schedule slips','Importer cover shortens','Feed cost pass-through'],{y:2023,t:'Canal drought restrictions',r:'Transit slot cuts redirected cargo and lifted freight',s:83},'Canal transit slots',['GDELT','World Bank','Spot Markets'],['Prioritise bulk grain slots','Expand alternative routing capacity','Book freight forward','Shift part of export mix to alternate routes']),
+ A('a12','WATCH',['global','americas'],'Inflation','Diesel pass-through lifting inland freight',6,75.6,[2,5,730],'Diesel is up 11% in a month, and trucking rate quotes are moving ahead of freight indices.',['Diesel +11% in a month','Trucking quotes rise','Inland freight rises','Food retail costs follow'],['Diesel +11%','Trucking +7%','Retail cost +1.5%','Produce margins squeezed','Food CPI +0.3 pts','Regional price divergence'],{y:2022,t:'Fuel-led freight surge',r:'Food distribution costs rose with a short lag',s:69},'Diesel prices',['Spot Markets','World Bank'],['Time fuel-tax relief carefully','Support logistics operators','Hedge diesel for distribution fleets','Index freight contracts to fuel']),
+ A('a13','WATCH',['global'],'Supply chain','Container spot rates drift above 8-week trend',8,79.9,[3,7,990],'Composite container rates are 9% above the eight-week trend, a leading sign of goods price pressure.',['Rates above trend','Carrier capacity tightens','Landed costs rise','Goods prices follow'],['Rates +9%','Capacity -5%','Landed cost +3%','Retail margins squeezed','Goods CPI +0.3 pts','Inventory rebuild delays'],{y:2021,t:'Container rate surge',r:'Goods inflation followed with a one to two quarter lag',s:71},'Container rates',['Spot Markets','GDELT','Forbes'],['Monitor port and carrier capacity','Support small importers with freight facilities','Fix contract rates early','Spread shipments across carriers']),
+ A('a14','ELEVATED',['global','eafrica'],'Supply chain','Mombasa corridor truck dwell time rising at border posts',8,84.1,[3,8,1200],'Border-post dwell time is up 46% and yard utilisation at the port is above 90%, slowing food and fuel into landlocked markets.',['Border dwell +46%','Yard utilisation above 90%','Delivery times lengthen','Inland prices rise'],['Dwell +46%','Yard use >90%','Inland price premium +8%','Fuel shortages locally','Landlocked market inflation','Humanitarian delays'],{y:2020,t:'Corridor congestion',r:'Inland price premiums widened for weeks',s:67},'Corridor dwell time',['GDELT','FAO','X/Social Velocity'],['Streamline border clearance procedures','Add rail and off-peak capacity','Contract buffer storage inland','Use multi-modal freight options'])
+];
+const SHOCK=[
+ A('s1','CRITICAL',['global','mena','eurozone'],'Supply chain','SIMULATED SHOCK: Suez and Red Sea transit suspension',3,95.8,[4,31,9400],'A simulated transit suspension removes a major route for grain, fuel and containers. Freight and insurance reprice within hours.',['Transit suspended','Cape routing adds 10+ days','Freight and insurance reprice','Import-dependent prices jump'],['Freight +45%','Transit +10 days','Wheat landed cost +9%','Fuel import costs up','Bread price pressure','Social unrest risk rises'],{y:2021,t:'Canal blockage episode',r:'Short, sharp freight spike with delayed goods impact',s:78},'Route suspension',['GDELT','Spot Markets','X/Social Velocity','Forbes'],['Activate emergency reserve release','Open alternate corridors','Lock freight and fuel hedges','Divert cargo to alternate ports']),
+ A('s2','CRITICAL',['global','mena'],'Inflation','SIMULATED SHOCK: Brent +14% intraday, diesel and freight repricing',2,93.4,[3,26,7800],'A simulated oil spike feeds diesel, freight and fertilizer costs across import-dependent economies.',['Oil spikes 14%','Diesel and freight reprice','Fertilizer cost rises','Food distribution costs follow'],['Brent +14%','Diesel +10%','Freight +9%','Fertilizer +6%','Food CPI +1.2 pts','Subsidy bills widen'],{y:2022,t:'Energy price shock',r:'Fuel-led food and freight inflation over two quarters',s:84},'Oil price shock',['Spot Markets','World Bank','Forbes'],['Time fuel subsidy support carefully','Release strategic fuel stocks','Hedge diesel for two quarters','Reprice procurement indexes']),
+ A('s3','CRITICAL',['global','mena','eafrica'],'Shortage','SIMULATED SHOCK: Wheat futures limit-up, importers pause tenders',2,92.1,[3,22,6900],'A simulated wheat spike makes importers pause tenders, raising the near-term shortage probability across import-dependent regions.',['Futures limit-up','Importers pause tenders','Stock cover shortens','Shortage probability rises'],['Futures limit-up','Tenders paused','Stock cover -9 days','Flour supply tight','Bread shortages likely','Unrest risk rises'],{y:2008,t:'Staple price spike',r:'Export curbs and panic buying followed',s:80},'Wheat price spike',['Spot Markets','FAO','GDELT'],['Release reserve stocks','Negotiate bilateral supply','Roll wheat call options','Secure alternative origins']),
+ A('s4','CRITICAL',['global','mena','eafrica'],'Inflation','SIMULATED SHOCK: Bread price protests spreading in social velocity',1,90.7,[2,18,12200],'Simulated social-velocity signals show protest clusters over bread prices across multiple cities, an escalation indicator.',['Protest chatter spikes','Cluster spreads to cities','Policy pressure rises','Price controls and subsidy shifts'],['Mentions 9x baseline','Protest clusters in 5 cities','Policy response pressure','Price controls likely','Supply distortions','Political risk premium'],{y:2011,t:'Food-price unrest wave',r:'Protests followed sustained staple price rises',s:73},'Protest velocity',['X/Social Velocity','GDELT'],['Pre-empt with targeted support','Increase transparency on stocks','Prepare scenario hedges','Review political risk exposure'])
+];
+const HOT=[
+ {id:'h1',n:'Addis Ababa',lon:38.7,lat:9,reg:['eafrica'],al:'a1'},{id:'h2',n:'Mombasa corridor',lon:39.7,lat:-4,reg:['eafrica'],al:'a14'},
+ {id:'h3',n:'Cairo',lon:31.2,lat:30,reg:['mena'],al:'a3'},{id:'h4',n:'Red Sea',lon:42.5,lat:15.5,reg:['mena'],al:'a4'},
+ {id:'h5',n:'Hormuz',lon:56.3,lat:26.5,reg:['mena'],al:'a5'},{id:'h6',n:'Black Sea',lon:33,lat:43.7,reg:['eurozone','mena'],al:'a6'},
+ {id:'h7',n:'Rotterdam / TTF',lon:4.5,lat:52,reg:['eurozone'],al:'a7'},{id:'h8',n:'Mekong',lon:106.7,lat:10.8,reg:['seasia'],al:'a9'},
+ {id:'h9',n:'Port Klang',lon:101.4,lat:3,reg:['seasia'],al:'a10'},{id:'h10',n:'Panama Canal',lon:-79.6,lat:9,reg:['americas'],al:'a11'},
+ {id:'h11',n:'Santos',lon:-46.3,lat:-23.9,reg:['americas'],al:'a12'},{id:'h12',n:'Shanghai',lon:121.5,lat:31.2,reg:['seasia'],al:'a13'}];
+const SHOCK_HOT={s1:'h4',s2:'h5',s3:'h6',s4:'h3'};
+const BASK=[
+ {id:'energy',n:'Energy',ic:'flame',rt:11.2,off:6.1,w:24,items:[['Brent crude','$91.40',4.2],['TTF gas','EUR 44.6',9.1],['Diesel (retail)','$1.38/L',6.7]]},
+ {id:'grains',n:'Grains',ic:'wheat',rt:14.8,off:7.9,w:21,items:[['Wheat (CBOT)','612.5c/bu',8.4],['Maize','478.3c/bu',5.1],['Rice (5% broken)','$561/t',7.7]]},
+ {id:'fert',n:'Fertilizers',ic:'sprout',rt:24.5,off:11.0,w:12,items:[['Urea','$512/t',18.3],['DAP','$684/t',12.9],['Potash','$362/t',4.4]]},
+ {id:'freight',n:'Freight',ic:'ship',rt:18.3,off:5.2,w:17,items:[['Baltic Dry','1,840',11.6],['Container index','2,310',9.2],['Black Sea dry bulk','$38/t',14.0]]},
+ {id:'staples',n:'Consumer Staples',ic:'shopping-basket',rt:9.6,off:5.8,w:26,items:[['Cooking oil','$1.92/L',7.9],['Flour and bread','$0.84/kg',6.6],['Sugar','$0.61/kg',3.8]]}];
+const CHK=[
+ {n:'Suez Canal',lon:32.5,lat:30,reg:['mena','eurozone'],st:'CONGESTED',delay:2.4,flow:71,risk:74,wait:38,note:'Convoy slots reduced; Cape routing adds 9-12 days'},
+ {n:'Panama Canal',lon:-79.6,lat:9,reg:['americas'],st:'CONGESTED',delay:3.1,flow:64,risk:69,wait:29,note:'Draft limits cut daily transits; grain bookings deferred'},
+ {n:'Strait of Hormuz',lon:56.3,lat:26.5,reg:['mena'],st:'OPEN',delay:.4,flow:96,risk:52,wait:11,note:'Physical flows normal; war-risk premiums rising'},
+ {n:'Black Sea Grain Corridor',lon:31,lat:43.5,reg:['eurozone','mena'],st:'DISRUPTED',delay:6.2,flow:48,risk:88,wait:57,note:'Inspection backlog; insurance cover thinning'},
+ {n:'East African Logistics (Mombasa corridor)',lon:39.7,lat:-4,reg:['eafrica'],st:'CONGESTED',delay:4.6,flow:58,risk:81,wait:44,note:'Border dwell and yard utilisation elevated'}];
+const COM=[
+ {n:'Wheat',su:27.4,days:38,p:62,reg:['mena','eurozone','eafrica']},{n:'Maize',su:24.1,days:44,p:55,reg:['eafrica','americas']},
+ {n:'Rice',su:33.8,days:61,p:41,reg:['seasia']},{n:'Vegetable oil',su:18.9,days:29,p:71,reg:['seasia','mena']},
+ {n:'Urea / fertilizer',su:15.2,days:21,p:83,reg:['eafrica','seasia']},{n:'Diesel',su:21.6,days:26,p:58,reg:['eafrica','mena','americas']}];
+const PORTS=[
+ {n:'Djibouti',w:4.2,v:31,d:38,reg:['eafrica']},{n:'Mombasa',w:5.1,v:44,d:46,reg:['eafrica']},{n:'Port Said',w:2.9,v:38,d:22,reg:['mena']},
+ {n:'Jebel Ali',w:1.4,v:19,d:6,reg:['mena']},{n:'Constanta',w:6.2,v:57,d:51,reg:['eurozone']},{n:'Rotterdam',w:1.8,v:25,d:9,reg:['eurozone']},
+ {n:'Port Klang',w:3.6,v:33,d:40,reg:['seasia']},{n:'Santos',w:2.7,v:29,d:14,reg:['americas']},{n:'Balboa (Panama)',w:3.4,v:29,d:27,reg:['americas']}];
+const SIGS=[
+ ['Forbes',3,['eafrica','global'],'Coverage cluster on agri-input supply tightness: 14 items in 6 hours, 3.1x baseline.',[['COMMODITY','Urea'],['LOC','East Africa'],['EVENT','Supply shortfall']],'a1'],
+ ['X/Social Velocity',5,['mena','global'],'Bread-price complaint velocity in Cairo-area posts 4.7x its 7-day mean; geo-clustered around three districts.',[['COMMODITY','Bread'],['LOC','Cairo'],['METRIC','Velocity 4.7x']],'a3'],
+ ['GDELT',9,['eurozone','mena','global'],'Event cluster: shipping-inspection delays, Black Sea region. Tone -4.1, 38 events in 24 hours.',[['LOC','Black Sea'],['EVENT','Inspection delay'],['METRIC','Tone -4.1']],'a6'],
+ ['Spot Markets',12,['global','mena'],'Wheat nearby/deferred spread widened 6.1 points in one session; open interest up 4%.',[['COMMODITY','Wheat'],['METRIC','Spread +6.1'],['ORG','Futures exchange']],'a3'],
+ ['World Bank',18,['eafrica','global'],'Commodity price dataset update: fertilizer index +4.4% month on month, above the 12-month band.',[['COMMODITY','Fertilizer index'],['METRIC','+4.4% m/m'],['ORG','World Bank']],'a1'],
+ ['FAO',26,['eafrica','global'],'Price monitoring series: retail maize up in 4 of 6 monitored East African markets over 14 days.',[['COMMODITY','Maize'],['LOC','East Africa'],['METRIC','4 of 6 markets']],'a2'],
+ ['GDELT',31,['mena','global'],'Event cluster: war-risk premium discussion near the Gulf. Tone -3.2, 17 events.',[['LOC','Hormuz'],['EVENT','Premium increase'],['METRIC','Tone -3.2']],'a5'],
+ ['X/Social Velocity',38,['seasia','global'],'Rice export-curb rumour velocity 6.0x baseline across three markets, low source reliability.',[['COMMODITY','Rice'],['EVENT','Export curb rumour'],['METRIC','Velocity 6.0x']],'a9'],
+ ['Spot Markets',44,['seasia','global'],'5% broken rice quote +8% over nine days; forward buying volumes elevated.',[['COMMODITY','Rice'],['METRIC','+8% / 9 days'],['EVENT','Forward buying']],'a9'],
+ ['Forbes',52,['americas','global'],'Coverage cluster on canal capacity limits and grain export scheduling: 9 items in 12 hours.',[['LOC','Panama Canal'],['COMMODITY','Grain'],['EVENT','Transit limits']],'a11'],
+ ['World Bank',63,['eurozone','global'],'Producer price dataset: food processing PPI momentum positive for a fourth consecutive print.',[['METRIC','Food PPI'],['LOC','Euro area'],['ORG','World Bank']],'a8'],
+ ['GDELT',71,['eafrica','global'],'Event cluster: border-post queueing along Mombasa corridor. Tone -3.6, 24 events.',[['LOC','Mombasa corridor'],['EVENT','Queueing'],['METRIC','Tone -3.6']],'a14'],
+ ['FAO',88,['global','seasia'],'Price monitoring series: vegetable oil export prices up 3.4% month on month.',[['COMMODITY','Vegetable oil'],['METRIC','+3.4% m/m'],['ORG','FAO']],'a10'],
+ ['Spot Markets',97,['eurozone','global'],'Gas storage draw 1.4 standard deviations above seasonal norm; front-month contract firmer.',[['COMMODITY','Natural gas'],['METRIC','+1.4 sd'],['LOC','Europe']],'a7'],
+ ['X/Social Velocity',110,['americas','global'],'Diesel price complaint mentions up 2.2x in inland freight communities.',[['COMMODITY','Diesel'],['METRIC','Mentions 2.2x'],['EVENT','Freight cost']],'a12'],
+ ['Forbes',126,['global'],'Coverage cluster on container rates and carrier capacity: 7 items in 24 hours.',[['COMMODITY','Container freight'],['EVENT','Capacity tightening'],['METRIC','7 items']],'a13']
+].map((s,i)=>({id:i+1,src:s[0],t:s[1],reg:s[2],txt:s[3],ents:s[4],al:s[5],fresh:false}));
+const TICK=[['BRENT',91.4],['WTI',87.2],['WHEAT',612.5],['MAIZE',478.3],['RICE 5%',561],['PALM OIL',3940],['UREA',512],['DAP',684],['BALTIC DRY',1840],['CONTAINER',2310],['TTF GAS',44.6],['USD/ETB',118.4],['FAO FFPI',128.6]].map(x=>({n:x[0],v:x[1],d:(Math.random()-.4)*1.2}));
+
+/* ---------- state ---------- */
+const S={view:'command',region:'global',tf:'7D',shock:0,sigF:'All',sigSel:1,basket:'energy',imp:null,layers:{risk:true,choke:true},vb:null,sigN:0,live:14280};
+const CH={};
+const NAVS=[['command','layout-dashboard','Global Command Center','KPIs, risk map, early warnings'],['inflation','trending-up','Inflation & Price Tracking','Real-time index vs official CPI'],['supply','ship','Supply Chain & Shortage Radar','Chokepoints, stock cover'],['signals','brain-circuit','Signal Ingestion & AI Lab','Source feed and reasoning']];
+const alerts=()=>SHOCK.slice(0,S.shock).reverse().concat(ALERTS);
+const alertsFor=()=>alerts().filter(a=>a.regs.includes(S.region)).sort((a,b)=>SEVR[a.sev]-SEVR[b.sev]||b.conf-a.conf);
+const getAlert=id=>alerts().find(a=>a.id===id)||SHOCK.concat(ALERTS).find(a=>a.id===id);
+function M(){const r=REG[S.region],k=S.shock;return{rt:r.rt+k*.8,off:r.off,sp:clamp(r.sp+k*4,0,97),sig:Math.round(r.sig*(1+k*.07)),thr:k>=2?'CRITICAL':r.thr}}
+function toast(msg,kind=''){const t=document.createElement('div');t.className='toast '+kind;t.innerHTML=msg;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),4200)}
+
+/* ---------- series ---------- */
+function labels(){const{n,step}=TF[S.tf],now=Date.now();return Array.from({length:n},(_,i)=>{const d=new Date(now-(n-1-i)*step*36e5),h=String(d.getUTCHours()).padStart(2,'0');return step<24?(S.tf==='24H'?h+':00':MON[d.getUTCMonth()]+' '+d.getUTCDate()+' '+h+'h'):MON[d.getUTCMonth()]+' '+d.getUTCDate()})}
+function series(key,start,end,vol,spike){const n=TF[S.tf].n,r=rnd(hash(key+S.tf)),out=[];for(let i=0;i<n;i++){const t=i/(n-1);out.push(start+(end-start)*Math.pow(t,1.7)+(r()-.5)*vol)}
+ if(spike){const m=Math.ceil(n*.18);for(let i=n-m;i<n;i++)out[i]+=spike*(i-(n-m)+1)/m}return out.map(v=>+v.toFixed(2))}
+function officialS(start,end){const n=TF[S.tf].n,b=Math.ceil(n/5);return Array.from({length:n},(_,i)=>+(start+(end-start)*Math.min(4,Math.floor(i/b))/4).toFixed(2))}
+
+/* ---------- world dot map ---------- */
+const POLY={
+ na:[[-168,66],[-156,71],[-125,70],[-95,72],[-82,68],[-78,58],[-62,58],[-55,50],[-67,44],[-76,35],[-81,31],[-80,25],[-90,29],[-97,26],[-97,20],[-87,21],[-88,16],[-83,10],[-78,8],[-83,8],[-92,14],[-105,20],[-110,24],[-115,30],[-123,38],[-125,48],[-135,58],[-150,60],[-165,60]],
+ gr:[[-55,60],[-45,60],[-20,70],[-20,82],[-60,82],[-70,76]],
+ sa:[[-78,8],[-72,12],[-62,10],[-50,0],[-35,-6],[-39,-15],[-48,-26],[-58,-38],[-65,-42],[-68,-52],[-72,-52],[-74,-40],[-71,-20],[-81,-6],[-80,-1]],
+ af:[[-17,21],[-13,27],[-9,32],[-6,36],[3,37],[10,37],[11,33],[15,32],[20,31],[25,32],[32,31],[34,28],[37,22],[39,16],[43,12],[51,12],[51,10],[47,4],[41,-2],[40,-10],[40,-15],[35,-22],[33,-26],[32,-29],[27,-34],[20,-35],[18,-32],[14,-23],[12,-17],[13,-8],[9,-1],[9,4],[6,4],[4,6],[-4,5],[-8,4],[-13,8],[-17,14]],
+ eu:[[-9,37],[-9,43],[-2,43.5],[-4.5,48.5],[2,51],[8,54],[10.5,57.5],[12,55],[20,55],[24,59.5],[30,60],[23,65],[21,69],[30,70],[41,67],[60,70],[75,73],[100,78],[113,74],[140,72],[170,70],[180,68],[170,60],[156,51],[142,59],[140,48],[132,43],[129,41],[126,35],[122,40],[121,30],[119,25],[111,21],[108,21.5],[106,19],[109,12],[105,9],[103,10.5],[100,13.5],[99,10],[104,1.5],[101,3],[100,6],[98,8],[98,16],[94,17],[92,21],[90,22],[87,21],[80,15],[78,8],[76,9],[73,17],[72,21],[68,23],[66,25],[57,25.5],[56.5,27],[50,30],[48,30],[50,26],[52,24],[56,26],[56,24],[59,22],[57,19],[52,16],[44,12.5],[43,13],[39,21],[35,28],[34,31],[36,36],[30,36.5],[27,37],[26,40],[29,41],[28,41.5],[23,40],[24,38],[20,39],[19,42],[13,45.5],[16,41.5],[18,40],[16,38],[12,41.5],[9,44],[3,43],[0,39],[-2,36.8],[-6,36.5]],
+ uk:[[-6,50],[1,51],[2,53],[-2,58],[-6,57],[-3,54]],ie:[[-10,52],[-6,52],[-6,55],[-10,54]],ic:[[-24,64],[-14,64],[-14,66],[-22,66]],
+ jp:[[130,31],[135,34],[140,36],[142,40],[141,45],[139,41],[135,36],[131,34]],
+ id1:[[95,5],[104,-1],[106,-6],[102,-4],[96,2]],id2:[[106,-6],[115,-8],[114,-7]],bo:[[109,1],[117,7],[119,1],[116,-4],[110,-3]],su:[[119,1],[125,1],[121,-5],[119,-5]],ng:[[131,-1],[141,-3],[150,-10],[141,-9],[135,-4]],
+ ph:[[120,18],[122,18],[126,8],[122,7],[120,12]],lk:[[80,6],[82,7],[81,9],[80,9.5]],
+ au:[[114,-22],[122,-18],[131,-12],[137,-12],[142,-11],[146,-19],[153,-27],[150,-37],[140,-38],[130,-32],[115,-34]],nz:[[172,-35],[178,-38],[175,-41],[172,-41]],mg:[[44,-25],[50,-15],[49,-12],[43,-17]]};
+const HOLES=[[[28,41.5],[28,45],[30,46],[34,46],[36,45],[41,41.5],[36,41],[29,41]],[[47,37],[50,37],[54,37],[54,41],[53,45],[50,46],[47,44],[48,41]]];
+function inPoly(x,y,p){let c=false;for(let i=0,j=p.length-1;i<p.length;j=i++){const[xi,yi]=p[i],[xj,yj]=p[j];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c}return c}
+const isLand=(x,y)=>Object.values(POLY).some(p=>inPoly(x,y,p))&&!HOLES.some(h=>inPoly(x,y,h));
+const MW=1000,MH=470,px=lo=>(lo+180)/360*MW,py=la=>(78-la)/136*MH;
+const landCache={};
+function boxVB(b){return[px(b[0]),py(b[3]),px(b[2])-px(b[0]),py(b[1])-py(b[3])]}
+function landPath(reg){if(landCache[reg])return landCache[reg];const b=REG[reg].box,vb=boxVB(b),k=vb[2]/MW,step=clamp(1.8*Math.sqrt(k),.5,1.8);let d='';
+ for(let la=b[3]+step;la>=b[1]-step;la-=step)for(let lo=b[0]-step;lo<=b[2]+step;lo+=step)if(isLand(lo,la))d+=`M${px(lo).toFixed(1)} ${py(la).toFixed(1)}h0`;
+ return landCache[reg]={d,sw:+(1.25*step).toFixed(2)}}
+function hotSev(h){const a=getAlert(h.al);let sev=a?a.sev:'WATCH';SHOCK.slice(0,S.shock).forEach(s=>{if(SHOCK_HOT[s.id]===h.id)sev='CRITICAL'});return sev}
+function mapSVG(){const reg=S.region,vb=boxVB(REG[reg].box),k=vb[2]/MW,u=Math.max(.34,Math.sqrt(k)),lp=landPath(reg),cur=S.vb||vb;
+ const on=h=>reg==='global'||h.reg.includes(reg);
+ const risk=S.layers.risk?HOT.map(h=>{const sev=hotSev(h),c=SEVH[sev],x=px(h.lon),y=py(h.lat),r=(sev==='CRITICAL'?7.5:6)*u,dim=on(h)?1:.22;
+  return`<g class="hot" data-act="hot" data-id="${h.id}" tabindex="0" role="button" aria-label="${h.n}, ${sev}" opacity="${dim}">${sev==='CRITICAL'?`<circle class="ring" cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`:''}<circle class="c" cx="${x}" cy="${y}" r="${r}" fill="${c}" fill-opacity=".85" stroke="#06090F" stroke-width="${1.6*u}"/><text x="${x+r+3*u}" y="${y+4*u}" font-size="${12*u}" fill="#E2E8F0" stroke="#06090F" stroke-width="${3*u}" paint-order="stroke" font-weight="600">${h.n}</text></g>`}).join(''):'';
+ const chk=S.layers.choke?CHK.map(c=>{const x=px(c.lon),y=py(c.lat),s=5*u,col=c.st==='DISRUPTED'?'#EF4444':c.st==='CONGESTED'?'#F59E0B':'#10B981',dim=reg==='global'||c.reg.includes(reg)?1:.22;
+  return`<g opacity="${dim}"><path d="M${x} ${y-s}L${x+s} ${y}L${x} ${y+s}L${x-s} ${y}Z" fill="none" stroke="${col}" stroke-width="${1.8*u}"/><title>${c.n}: ${c.st}</title></g>`}).join(''):'';
+ const grid=[-60,-30,0,30,60,90,120,150].map(lo=>`<line x1="${px(lo)}" x2="${px(lo)}" y1="0" y2="${MH}" stroke="#13203a" stroke-width="${.8*u}"/>`).join('')+[-30,0,30,60].map(la=>`<line y1="${py(la)}" y2="${py(la)}" x1="0" x2="${MW}" stroke="#13203a" stroke-width="${.8*u}"/>`).join('');
+ return`<svg id="mapsvg" viewBox="${cur.join(' ')}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Dotted world map with risk nodes and chokepoints">${grid}<path class="land" d="${lp.d}" stroke-width="${lp.sw}"/>${chk}${risk}</svg>`}
+function tweenVB(){const svg=$('#mapsvg');if(!svg)return;const to=boxVB(REG[S.region].box),from=S.vb||to,t0=performance.now();
+ (function st(t){const p=clamp((t-t0)/550,0,1),e=1-Math.pow(1-p,3),v=from.map((f,i)=>f+(to[i]-f)*e);S.vb=v;svg.setAttribute('viewBox',v.join(' '));if(p<1)requestAnimationFrame(st)})(t0)}
+
+/* ---------- shared UI pieces ---------- */
+const triBar=a=>{const w=[a.src[0]*9,a.src[1]*3.2,Math.log10(a.src[2]+1)*7],t=w.reduce((x,y)=>x+y,0);return`<div class="tri" role="img" aria-label="Evidence mix">${['#10B981','#06B6D4','#F472B6'].map((c,i)=>`<i style="width:${w[i]/t*100}%;background:${c}"></i>`).join('')}</div>`};
+const triTxt=a=>`${a.src[0]} Official Datasets + ${a.src[1]} News Wires + ${a.src[2].toLocaleString()} Social Signals`;
+function alertCard(a){const isNew=a.id[0]==='s';return`<button class="al ${SEVC[a.sev]}" data-act="alert" data-id="${a.id}"><div class="r1"><span class="badge ${SEVC[a.sev]}">${a.sev}</span><span class="mut">${a.cat}</span>${isNew?'<span class="new">NEW</span>':''}</div><h4>${a.title}</h4>
+ <div class="ld">${icon('clock-3')} Detected <b class="mono">${a.lead} days</b> ahead of official CPI print</div>
+ <div class="cfr"><b class="mono">${a.conf.toFixed(1)}% Confidence</b>${triBar(a)}</div><div class="tt mono">${triTxt(a)}</div><div class="why">${icon('sparkles')} Why this alert?</div></button>`}
+function gauge(p,size=64){const r=size/2-6,c=2*Math.PI*r,col=p>=70?'#EF4444':p>=45?'#F59E0B':'#10B981';
+ return`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${Math.round(p)} percent"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="#162033" stroke-width="6"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${col}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 ${size/2} ${size/2})"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" fill="#E2E8F0" font-size="${size/4.2}" font-weight="700" font-family="JetBrains Mono,monospace">${Math.round(p)}%</text></svg>`}
+function animateNums(){$$('[data-to]').forEach(el=>{const to=+el.dataset.to,d=+(el.dataset.d||1),s=el.dataset.s||'',t0=performance.now();(function st(t){const p=clamp((t-t0)/600,0,1),e=1-Math.pow(1-p,3);el.textContent=(to*e).toFixed(d)+s;if(p<1)requestAnimationFrame(st)})(t0)})}
+function mk(id,cfg){const el=document.getElementById(id);if(!el)return;if(typeof Chart==='undefined'){el.parentElement.innerHTML='<p class="mut p12">Chart.js did not load. Check your internet connection and reload.</p>';return}if(CH[id])CH[id].destroy();CH[id]=new Chart(el,cfg)}
+const AX=(extra={})=>({grid:{color:'rgba(30,41,59,.7)'},ticks:{font:{family:'JetBrains Mono',size:10},maxTicksLimit:8},...extra});
+function lineCfg(lab,rt,off,rtName){return{type:'line',data:{labels:lab,datasets:[
+ {label:rtName,data:rt,borderColor:'#06B6D4',borderWidth:2.5,pointRadius:0,pointHoverRadius:4,tension:.35,fill:true,backgroundColor:c=>{const g=c.chart.ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,'rgba(6,182,212,.32)');g.addColorStop(1,'rgba(6,182,212,0)');return g}},
+ {label:'Official CPI (lagging)',data:off,borderColor:'#10B981',borderWidth:2,borderDash:[6,4],pointRadius:0,stepped:'before',fill:false}]},
+ options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{boxWidth:10,usePointStyle:true,font:{size:11}}},tooltip:{backgroundColor:'#0D131F',borderColor:'#1E293B',borderWidth:1,titleFont:{family:'JetBrains Mono'},bodyFont:{family:'JetBrains Mono'},callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}%`}}},scales:{x:AX(),y:AX({ticks:{callback:v=>v+'%',font:{family:'JetBrains Mono',size:10}}})}}}}
+
+/* ---------- views ---------- */
+function vCommand(){const m=M(),r=REG[S.region],al=alertsFor(),lead=al.length?al.reduce((s,a)=>s+a.lead,0)/al.length:0,conf=al.length?al.reduce((s,a)=>s+a.conf,0)/al.length:0,cnt=s=>al.filter(a=>a.sev===s).length;
+ const imp=S.imp&&al.find(a=>a.id===S.imp)?S.imp:(al[0]||{}).id;
+ return`<div class="view"><section class="kpis">
+ <div class="panel kpi" style="--k:var(--cy)"><div class="l">${icon('activity')} REAL-TIME INDEX</div><div class="v" style="color:var(--cy)"><span data-to="${m.rt}" data-s="%">0</span></div><div class="s">EconoScope basket, year on year</div></div>
+ <div class="panel kpi" style="--k:var(--em)"><div class="l">${icon('landmark')} OFFICIAL CPI (LAGGING)</div><div class="v" style="color:var(--em)"><span data-to="${m.off}" data-s="%">0</span></div><div class="s">Gap <b class="mono ${m.rt-m.off>3?'dn':'up'}">+${f1(m.rt-m.off)} pts</b> vs real time</div></div>
+ <div class="panel kpi" style="--k:var(--vi)"><div class="l">${icon('timer')} AVG DETECTION LEAD</div><div class="v"><span data-to="${lead}" data-d="1">0</span><small class="mut" style="font-size:14px"> days</small></div><div class="s">Ahead of the official CPI print</div></div>
+ <div class="panel kpi" style="--k:var(--am)"><div class="l">${icon('package-x')} SHORTAGE PROBABILITY</div><div class="gz"><div class="v" style="color:${m.sp>=65?'var(--cr)':'var(--am)'}"><span data-to="${m.sp}" data-d="0" data-s="%">0</span></div></div><div class="s">${COM.filter(c=>S.region==='global'||c.reg.includes(S.region)).length} commodities tracked</div></div>
+ <div class="panel kpi" style="--k:var(--cr)"><div class="l">${icon('siren')} ACTIVE ALERTS</div><div class="v"><span data-to="${al.length}" data-d="0">0</span></div><div class="s"><span class="dn">${cnt('CRITICAL')} critical</span> &bull; <span style="color:var(--am)">${cnt('ELEVATED')} elevated</span> &bull; <span style="color:var(--cy)">${cnt('WATCH')} watch</span></div></div></section>
+ <section class="g2"><div class="panel"><div class="ph"><h3>${icon('radar')} ${S.region==='global'?'Global Risk Node Map':r.n+' Risk Nodes'}</h3><span class="grow"></span>
+  <button class="chip" aria-pressed="${S.layers.risk}" data-act="layer" data-id="risk">Risk nodes</button><button class="chip" aria-pressed="${S.layers.choke}" data-act="layer" data-id="choke">Chokepoints</button></div>
+  <div class="mapw">${mapSVG()}</div><div class="ph" style="border:0;border-top:1px solid var(--line)"><div class="legend"><span><i style="background:#EF4444"></i>Critical</span><span><i style="background:#F59E0B"></i>Elevated</span><span><i style="background:#06B6D4"></i>Watch</span><span class="dim">Diamonds mark chokepoints. Select a node for the AI explanation.</span></div></div></div>
+  <div class="panel"><div class="ph"><h3>${icon('bell-ring')} Early Warning Feed</h3><span class="grow"></span><span class="mono dim">${al.length} signals</span></div><div class="feed">${al.map(alertCard).join('')||'<p class="mut">No alerts in this region.</p>'}</div></div></section>
+ <section class="g2b"><div class="panel"><div class="ph"><h3>${icon('line-chart')} Real-Time Inflation vs Official CPI</h3><span class="grow"></span><span class="badge ${m.rt-m.off>5?'cr':'am'}">GAP +${f1(m.rt-m.off)} PTS</span></div><div class="chart"><canvas id="cMain"></canvas></div></div>
+  <div class="panel"><div class="ph"><h3>${icon('network')} Impact Assessment</h3><span class="grow"></span><label class="sr-only" for="impSel" style="position:absolute;left:-9999px">Alert</label><select id="impSel">${al.slice(0,10).map(a=>`<option value="${a.id}" ${a.id===imp?'selected':''}>${a.title.slice(0,46)}</option>`).join('')}</select></div><div class="pb">${imp?impactHTML(getAlert(imp)):'<p class="mut">No alert selected.</p>'}</div></div></section></div>`}
+function impactHTML(a){const T=['1ST ORDER','2ND ORDER','3RD ORDER'];return`<div class="impg">${a.imp.map((o,i)=>`<div class="imc"><h6><span>${T[i]}</span><span>${i?'+'+(i*3)+'-'+(i*6)+' wks':'now'}</span></h6>${o.map(([t,p])=>`<div class="imn">${t}<div class="pb2"><i style="width:${p}%"></i></div><div class="mono dim" style="font-size:10px;margin-top:3px">${p}% likelihood</div></div>`).join('')}</div>`).join('')}</div><button class="btn" style="margin-top:12px" data-act="alert" data-id="${a.id}">${icon('sparkles')} Open AI explanation</button>`}
+function drawMain(){const m=M(),r=REG[S.region],lab=labels(),rt=series('rt'+S.region,m.off*.85,m.rt-S.shock*.8,m.rt*.045,S.shock?S.shock*m.rt*.07:0);mk('cMain',lineCfg(lab,rt,officialS(m.off*.85,m.off),'EconoScope Real-Time Index'))}
+
+function bk(b){const f=clamp(REG[S.region].rt/6.8,.5,3.6),rt=b.rt*Math.pow(f,.8)+S.shock*.6,off=b.off*Math.pow(f,.45);return{...b,rt,off}}
+function vInflation(){const bs=BASK.map(bk),sel=bs.find(b=>b.id===S.basket);const mx=Math.max(...bs.map(b=>b.rt));
+ return`<div class="view"><section class="cols3">${bs.map(b=>`<button class="bk" data-act="basket" data-id="${b.id}" aria-pressed="${b.id===S.basket}"><div class="t"><span>${icon(b.ic)} ${b.n}</span><span class="mono dim">w ${b.w}%</span></div><div class="n"><b>${f1(b.rt)}%</b><em>+${f1(b.rt-b.off)} pts</em></div><div class="hb"><i style="width:${b.rt/mx*100}%;background:var(--cy)"></i></div><div class="hb"><i style="width:${b.off/mx*100}%;background:var(--em)"></i></div><div class="mut" style="font-size:11px">Official ${f1(b.off)}% (lagging)</div></button>`).join('')}</section>
+ <section class="g2b"><div class="panel"><div class="ph"><h3>${icon('trending-up')} ${sel.n} basket: real-time vs official</h3><span class="grow"></span><span class="badge cy">TF ${S.tf}</span></div><div class="chart"><canvas id="cBask"></canvas></div></div>
+  <div class="panel"><div class="ph"><h3>${icon('list')} ${sel.n} components (simulated)</h3></div><div class="scr"><table><thead><tr><th>COMPONENT</th><th class="r">LEVEL</th><th class="r">30D CHANGE</th></tr></thead><tbody>${sel.items.map(i=>`<tr><td>${i[0]}</td><td class="r mono">${i[1]}</td><td class="r mono ${i[2]>5?'dn':'up'}">+${f1(i[2]*Math.min(1.6,REG[S.region].rt/6.8)**.5)}%</td></tr>`).join('')}</tbody></table></div>
+  <div class="pb mut" style="font-size:12px;border-top:1px solid var(--line)">${icon('info')} Real-time prices read the market weekly. Official CPI is refreshed monthly with a 4-6 week publication delay, so ${sel.n.toLowerCase()} pressure appears here first.</div></div></section>
+ <section class="panel"><div class="ph"><h3>${icon('scale')} Index vs official print, all baskets</h3></div><div class="scr"><table><thead><tr><th>BASKET</th><th class="r">REAL-TIME</th><th class="r">OFFICIAL</th><th class="r">GAP</th><th>LEAD</th></tr></thead><tbody>${bs.map(b=>`<tr><td>${b.n}</td><td class="r mono" style="color:var(--cy)">${f1(b.rt)}%</td><td class="r mono" style="color:var(--em)">${f1(b.off)}%</td><td class="r mono dn">+${f1(b.rt-b.off)} pts</td><td class="mono dim">${Math.round(8+(b.rt-b.off)*1.1)} days ahead</td></tr>`).join('')}</tbody></table></div></section></div>`}
+function drawBask(){const b=bk(BASK.find(x=>x.id===S.basket)),lab=labels();mk('cBask',lineCfg(lab,series('b'+S.basket+S.region,b.off*.8,b.rt-S.shock*.6,b.rt*.05,S.shock?S.shock*b.rt*.06:0),officialS(b.off*.8,b.off),b.n+' real-time index'))}
+
+function vSupply(){const f=clamp(REG[S.region].sp/41,.6,1.6),ck=CHK.filter(c=>S.region==='global'||c.reg.includes(S.region)),cm=COM.filter(c=>S.region==='global'||c.reg.includes(S.region)),pt=PORTS.filter(p=>S.region==='global'||p.reg.includes(S.region)),k=1+S.shock*.07;
+ const col=s=>s==='DISRUPTED'?'cr':s==='CONGESTED'?'am':'em';
+ return`<div class="view"><section><div class="legend" style="margin-bottom:8px">${icon('anchor')} Chokepoint monitor (simulated)</div><div class="cols3" style="grid-template-columns:repeat(auto-fit,minmax(290px,1fr))">${ck.map(c=>{const risk=clamp(c.risk*k,0,98),st=S.shock>=1&&(c.n.includes('Suez')||c.n.includes('Black'))?'DISRUPTED':c.st;return`<div class="panel ck"><div class="t"><span>${c.n}</span><span class="badge ${col(st)}">${st}</span></div><div class="mut" style="font-size:11.5px">${c.note}</div>
+ <div class="m"><div><small>DELAY</small><b>${f1(c.delay*k)}d</b></div><div><small>FLOW VS NORMAL</small><b>${Math.round(c.flow/k)}%</b></div><div><small>VESSELS WAITING</small><b>${Math.round(c.wait*k)}</b></div></div><div class="cfr"><span class="mono">Risk ${Math.round(risk)}</span><div class="hb" style="flex:1"><i style="width:${risk}%;background:${risk>=75?'var(--cr)':risk>=55?'var(--am)':'var(--em)'}"></i></div></div></div>`}).join('')||'<p class="mut">No chokepoints tracked for this region.</p>'}</div></section>
+ <section class="g2b"><div class="panel"><div class="ph"><h3>${icon('package-x')} Commodity shortage radar</h3></div><div class="scr"><table><thead><tr><th>COMMODITY</th><th>STOCK-TO-USE</th><th>DAYS OF COVER</th><th>SHORTAGE PROBABILITY</th></tr></thead><tbody>${cm.map(c=>{const p=clamp(c.p*f*(1+S.shock*.04),5,97),su=c.su*(1-S.shock*.03);return`<tr><td><b>${c.n}</b></td><td class="mono">${f1(su)}%<div class="hb" style="width:90px;margin-top:5px"><i style="width:${clamp(su*2.2,5,100)}%;background:${su<20?'var(--cr)':su<26?'var(--am)':'var(--em)'}"></i></div></td><td><span class="cd" data-end="${Date.now()+c.days*(1-S.shock*.05)*864e5}">--</span></td><td>${gauge(p,56)}</td></tr>`}).join('')}</tbody></table></div></div>
+  <div class="panel"><div class="ph"><h3>${icon('container')} Port congestion: average wait (days)</h3></div><div class="chart" style="height:${Math.max(220,pt.length*34+40)}px"><canvas id="cPort"></canvas></div></div></section>
+ <section class="panel"><div class="ph"><h3>${icon('table-2')} Port congestion metrics (simulated)</h3></div><div class="scr"><table><thead><tr><th>PORT</th><th class="r">AVG WAIT</th><th class="r">VESSELS IN QUEUE</th><th class="r">VS 30D AVERAGE</th></tr></thead><tbody>${pt.map(p=>`<tr><td>${p.n}</td><td class="r mono">${f1(p.w*k)}d</td><td class="r mono">${Math.round(p.v*k)}</td><td class="r mono ${p.d>25?'dn':'up'}">+${Math.round(p.d*k)}%</td></tr>`).join('')}</tbody></table></div></section></div>`}
+function drawPort(){const k=1+S.shock*.07,pt=PORTS.filter(p=>S.region==='global'||p.reg.includes(S.region));mk('cPort',{type:'bar',data:{labels:pt.map(p=>p.n),datasets:[{data:pt.map(p=>+(p.w*k).toFixed(1)),backgroundColor:pt.map(p=>p.w*k>=5?'#EF4444':p.w*k>=3?'#F59E0B':'#10B981'),borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:AX({ticks:{callback:v=>v+'d',font:{family:'JetBrains Mono',size:10}}}),y:AX()}}})}
+function tickCd(){$$('.cd').forEach(el=>{const ms=Math.max(0,+el.dataset.end-Date.now()),d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4),s=Math.floor(ms%6e4/1e3);el.textContent=`${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`})}
+
+function sigList(){return SIGS.filter(s=>(S.region==='global'||s.reg.includes(S.region))&&(S.sigF==='All'||s.src===S.sigF)).sort((a,b)=>a.t-b.t)}
+function vSignals(){const list=sigList(),sel=SIGS.find(s=>s.id===S.sigSel&&list.includes(s))||list[0],a=sel?getAlert(sel.al):null;
+ return`<div class="view"><div class="regbar"><span>SOURCE</span>${['All','Forbes','World Bank','FAO','X/Social Velocity','GDELT','Spot Markets'].map(s=>`<button class="chip" aria-pressed="${S.sigF===s}" data-act="sigf" data-id="${s}">${s}</button>`).join('')}</div>
+ <section class="sg"><div class="panel"><div class="ph"><h3>${icon('radio-tower')} Live multi-source feed (simulated)</h3><span class="grow"></span><span class="mono dim">${list.length} items</span></div><div class="sgl" id="sgl">${list.map(s=>`<button class="sr ${s.fresh?'fresh':''}" data-act="sig" data-id="${s.id}" aria-pressed="${sel&&s.id===sel.id}"><span class="mono dim">${s.t<60?s.t+'m':Math.round(s.t/60)+'h'}</span><span style="display:grid;gap:5px"><span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${srcTag(s.src)}<span class="mono dim" style="font-size:10px">${s.reg.filter(r=>r!=='global').map(r=>REG[r].n).join(', ')||'Global'}</span></span><span>${s.txt}</span></span></button>`).join('')||'<p class="mut p12">No signals match these filters.</p>'}</div></div>
+ <div class="panel"><div class="ph"><h3>${icon('brain-circuit')} AI reasoning pipeline</h3></div><div class="pb">${sel?`<div class="stg"><h6>${icon('inbox')} 1. RAW SIGNAL</h6><div>${sel.txt}</div><div class="mono dim" style="margin-top:6px;font-size:10.5px">${sel.src} &bull; ${sel.t<60?sel.t+' min':Math.round(sel.t/60)+' h'} ago &bull; simulated item</div></div>
+ <div class="stg"><h6>${icon('tags')} 2. ENTITY EXTRACTION</h6>${sel.ents.map(e=>`<span class="ent"><small>${e[0]}</small>${e[1]}</span>`).join('')}</div>
+ <div class="stg"><h6>${icon('git-branch')} 3. CAUSAL CHAIN</h6><div class="cz">${a.chain.map((c,i)=>`<div><span>${i+1}</span>${c}</div>`).join('')}</div></div>
+ <div class="stg"><h6>${icon('shield-check')} 4. TRIANGULATION AND ALERT</h6><div class="cfr"><b class="mono">${a.conf.toFixed(1)}% Confidence</b>${triBar(a)}</div><div class="tt mono" style="margin:6px 0 10px">${triTxt(a)}</div><button class="btn" data-act="alert" data-id="${a.id}">${icon('sparkles')} Open AI explanation</button></div>`:'<p class="mut">Select a signal.</p>'}</div></div></section></div>`}
+
+/* ---------- drawer ---------- */
+function openDrawer(id){const a=getAlert(id);if(!a)return;const c=2*Math.PI*34,mx=Math.max(a.src[0],a.src[1],1),tri=[['Official datasets',a.src[0],'#10B981'],['News wires',a.src[1],'#06B6D4'],['Social signals',a.src[2],'#F472B6']];
+ $('#drawer').innerHTML=`<div class="dh"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge ${SEVC[a.sev]}">${a.sev}</span><span class="mut">${a.cat}</span><span class="grow"></span><button class="btn" data-act="close" aria-label="Close drawer">${icon('x')} Close</button></div><h2>${a.title}</h2><div class="ld mono" style="color:#7dd3fc;font-size:12px">${icon('clock-3')} Detected ${a.lead} days ahead of official CPI print</div></div>
+ <div class="db"><section><h5>${icon('sparkles')} WHY THIS ALERT?</h5><p style="margin:0;font-size:13.5px;line-height:1.6">${a.why}</p></section>
+ <section><h5>${icon('shield-check')} EVIDENCE CONFIDENCE</h5><div style="display:flex;gap:16px;align-items:center;margin-bottom:12px"><svg width="86" height="86" viewBox="0 0 86 86"><circle cx="43" cy="43" r="34" fill="none" stroke="#162033" stroke-width="8"/><circle cx="43" cy="43" r="34" fill="none" stroke="#06B6D4" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c*a.conf/100} ${c}" transform="rotate(-90 43 43)"/><text x="43" y="43" text-anchor="middle" dominant-baseline="central" fill="#E2E8F0" font-family="JetBrains Mono,monospace" font-weight="700" font-size="15">${a.conf.toFixed(1)}%</text></svg><div class="mut" style="font-size:12px">Confidence rises when independent source types agree and when sources are reliable and fresh.</div></div>
+ <div class="trib">${tri.map(t=>`<div><span class="mut">${t[0]}</span><div class="hb"><i style="width:${clamp(Math.log10(t[1]+1)/Math.log10(a.src[2]+1)*100,6,100)}%;background:${t[2]}"></i></div><b class="mono">${t[1].toLocaleString()}</b></div>`).join('')}</div></section>
+ <section><h5>${icon('git-branch')} CAUSAL LOGIC</h5><div class="cz">${a.chain.map((x,i)=>`<div><span>${i+1}</span>${x}</div>`).join('')}</div></section>
+ <section><h5>${icon('network')} RIPPLE EFFECTS</h5>${impactHTML(a).replace(/<button.*<\/button>/,'')}</section>
+ <section><h5>${icon('quote')} SOURCE CITATIONS (SIMULATED FEED ITEMS)</h5>${a.cites.map(x=>`<div class="cite">${srcTag(x[0])}<span>${x[1]}</span></div>`).join('')}</section>
+ <section><h5>${icon('history')} HISTORICAL ANALOGS</h5><div class="an"><div style="display:flex;justify-content:space-between;gap:8px"><b>${a.an.y}: ${a.an.t}</b><span class="mono" style="color:var(--cy)">${a.an.s}% similar</span></div><div class="mut" style="margin-top:4px">${a.an.r}</div></div></section>
+ <section><h5>${icon('list-checks')} RECOMMENDED ACTIONS</h5><div class="mut" style="font-size:11px;margin-bottom:6px">POLICY</div>${a.act.slice(0,2).map(x=>`<div class="act">${icon('check-circle-2')}<span>${x}</span></div>`).join('')}<div class="mut" style="font-size:11px;margin:10px 0 6px">HEDGING</div>${a.act.slice(2).map(x=>`<div class="act">${icon('shield')}<span>${x}</span></div>`).join('')}</section>
+ <section style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" data-act="copy" data-id="${a.id}">${icon('clipboard-copy')} Copy briefing</button><button class="btn" data-act="toimpact" data-id="${a.id}">${icon('network')} Show in impact matrix</button></section>
+ <p class="dim" style="font-size:10.5px;margin:0">Simulated data for demonstration. Citations show source types, not real articles. Decision support only, not a forecast.</p></div>`;
+ $('#drawer').classList.add('on');$('#scrim').classList.add('on');$('#drawer').setAttribute('aria-hidden','false');window.lucide&&lucide.createIcons();$('#drawer').scrollTop=0}
+function closeDrawer(){$('#drawer').classList.remove('on');$('#scrim').classList.remove('on');$('#drawer').setAttribute('aria-hidden','true')}
+
+/* ---------- chrome ---------- */
+function renderHead(){const m=M(),b=$('#threat');b.className='badge '+SEVC[m.thr];b.innerHTML=`<span class="dot ${m.thr==='CRITICAL'?'cr':m.thr==='ELEVATED'?'am':''}" style="width:7px;height:7px"></span>${REG[S.region].n.toUpperCase()} THREAT: ${m.thr}`;
+ $('#tfs').innerHTML=Object.keys(TF).map(t=>`<button data-act="tf" data-id="${t}" aria-pressed="${S.tf===t}">${t}</button>`).join('');
+ const sb=$('#shockBtn');sb.classList.toggle('on',S.shock>0);sb.querySelector('span').textContent=S.shock>0?(S.shock<4?'Cascade running...':'Reset simulation'):'Simulate Crisis Shock'}
+function renderSide(){$('#side').innerHTML=NAVS.map(n=>`<button class="nav" data-act="tab" data-id="${n[0]}" ${S.view===n[0]?'aria-current="page"':''}>${icon(n[1])}<div><b>${n[2]}</b><span>${n[3]}</span></div></button>`).join('')+
+ `<h5>DATA SOURCES</h5><div class="srcs">${['World Bank','FAO FPMA','GDELT','Forbes feed','X / Social Velocity','Spot Markets'].map(s=>`<div><span class="dot" style="width:7px;height:7px"></span>${s} <span class="dim mono" style="margin-left:auto;font-size:9.5px">SIM</span></div>`).join('')}</div><div class="sim">${icon('triangle-alert')} <b>SIMULATED DATA.</b> Illustrative scenario for demonstration. Not real reports, prices or events.</div>`;
+ $('#mtabs').innerHTML=NAVS.map(n=>`<button class="chip" data-act="tab" data-id="${n[0]}" aria-pressed="${S.view===n[0]}">${n[2].split(' ')[0]} ${n[2].split(' ')[1]||''}</button>`).join('')}
+function renderReg(){$('#regbar').innerHTML='<span>LOCATION ANALYSIS</span>'+Object.entries(REG).map(([k,r])=>`<button class="chip" data-act="region" data-id="${k}" aria-pressed="${S.region===k}">${icon(r.ic)} ${r.n}<i>${alerts().filter(a=>a.regs.includes(k)).length}</i></button>`).join('')}
+function render(){renderHead();renderSide();renderReg();const v=$('#view');v.innerHTML={command:vCommand,inflation:vInflation,supply:vSupply,signals:vSignals}[S.view]();
+ if(S.view==='command'){drawMain();tweenVB()}if(S.view==='inflation')drawBask();if(S.view==='supply'){drawPort();tickCd()}
+ animateNums();if(window.lucide&&lucide.createIcons)lucide.createIcons()}
+
+/* ---------- shock cascade ---------- */
+function shockStep(){if(S.shock>=4)return;S.shock++;const a=SHOCK[S.shock-1];toast(`${icon('siren')} <b>${a.sev}</b> ${a.title.replace('SIMULATED SHOCK: ','')}`,'cr');render();if(S.shock<4)setTimeout(shockStep,1500);else toast(`${icon('shield-alert')} Cascade complete. Global threat level set to CRITICAL.`,'cr')}
+function shockToggle(){if(S.shock===0){toast('Simulated crisis shock injected. Watch the alert cascade.','am');shockStep()}else if(S.shock>=4){S.shock=0;toast('Simulation reset to baseline.');render()}}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const act=el.dataset.act,id=el.dataset.id;
+ if(act==='tab'){S.view=id;render()}else if(act==='region'){S.region=id;render()}else if(act==='tf'){S.tf=id;render()}else if(act==='shock')shockToggle();
+ else if(act==='alert')openDrawer(id);else if(act==='hot'){const h=HOT.find(x=>x.id===id),sk=SHOCK.slice(0,S.shock).find(s=>SHOCK_HOT[s.id]===id);openDrawer(sk?sk.id:h.al)}
+ else if(act==='layer'){S.layers[id]=!S.layers[id];render()}else if(act==='sigf'){S.sigF=id;render()}else if(act==='sig'){S.sigSel=+id;render()}else if(act==='basket'){S.basket=id;render()}
+ else if(act==='close')closeDrawer();
+ else if(act==='toimpact'){S.imp=id;S.view='command';if(!getAlert(id).regs.includes(S.region))S.region='global';closeDrawer();render();window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})}
+ else if(act==='copy'){const a=getAlert(id),t=`${a.sev} | ${a.title}\nLead: ${a.lead} days ahead of official CPI\nConfidence: ${a.conf.toFixed(1)}% (${triTxt(a)})\nWhy: ${a.why}\nPolicy: ${a.act.slice(0,2).join('; ')}\nHedging: ${a.act.slice(2).join('; ')}\n(Simulated data)`;
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Briefing copied to clipboard.')).catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Briefing copied to clipboard.')}catch{toast('Copy blocked by the browser. Select the text manually.','am')}ta.remove()})}});
+document.addEventListener('change',e=>{if(e.target.id==='impSel'){S.imp=e.target.value;render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('hot')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}))}});
+
+/* ---------- live telemetry ---------- */
+function drawTick(){const h=TICK.map((t,i)=>`<span class="ti"><b>${t.n}</b><span class="mono" data-tv="${i}">${t.v.toLocaleString(undefined,{maximumFractionDigits:2})}</span><span class="mono ${t.d>=0?'up':'dn'}" data-td="${i}">${t.d>=0?'&#9650;':'&#9660;'} ${Math.abs(t.d).toFixed(2)}%</span></span>`).join('');$('#tick').innerHTML=`<div class="trk">${h}${h}</div><span class="dim" style="position:absolute"></span>`}
+setInterval(()=>{TICK.forEach((t,i)=>{const c=(Math.random()-.5)*.004;t.v*=1+c;t.d+=c*100;$$(`[data-tv="${i}"]`).forEach(el=>el.textContent=t.v.toLocaleString(undefined,{maximumFractionDigits:2}));$$(`[data-td="${i}"]`).forEach(el=>{el.className='mono '+(t.d>=0?'up':'dn');el.innerHTML=(t.d>=0?'&#9650; ':'&#9660; ')+Math.abs(t.d).toFixed(2)+'%'})})},1600);
+setInterval(()=>{const base=M().sig;S.live=Math.round(base+(Math.random()-.5)*base*.02);$('#status').textContent=`AI INGESTION: ACTIVE • ${S.live.toLocaleString()} SIGNALS/MIN`;$('#clock').textContent=new Date().toISOString().slice(11,19)+' UTC';if(S.view==='supply')tickCd()},1000);
+const POOL=[['GDELT','Event cluster: logistics delays in','Tone -3.4'],['X/Social Velocity','Price-complaint velocity rising in','Velocity 3.1x'],['Spot Markets','Quote move with elevated volume in','Vol +18%'],['FAO','Price monitoring series update for','4 markets'],['Forbes','Coverage cluster on supply tightness in','6 items'],['World Bank','Dataset update flagged above band for','+1.2 sd']];
+setInterval(()=>{if(S.view!=='signals'||document.hidden)return;const p=POOL[Math.floor(Math.random()*POOL.length)],keys=Object.keys(REG).filter(k=>k!=='global'),k=keys[Math.floor(Math.random()*keys.length)],a=alerts().find(x=>x.regs.includes(k))||ALERTS[0];
+ SIGS.forEach(s=>{s.fresh=false;s.t+=0});SIGS.unshift({id:100+(++S.sigN),src:p[0],t:0,reg:[k,'global'],txt:`${p[1]} ${REG[k].n}. ${p[2]}. (simulated)`,ents:[['LOC',REG[k].n],['METRIC',p[2]],['ORG',p[0]]],al:a.id,fresh:true});if(SIGS.length>40)SIGS.pop();render()},7000);
+
+/* ---------- boot ---------- */
+if(typeof Chart!=='undefined'){Chart.defaults.color='#94A3B8';Chart.defaults.font.family='Inter, system-ui, sans-serif';Chart.defaults.borderColor='rgba(30,41,59,.7)'}
+drawTick();render();
+</script>
+
+</body></html>
